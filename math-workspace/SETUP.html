@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DMN Mathematics — no-card setup</title>
+  <style>
+    body{margin:0;background:#f5f4ef;color:#17223b;font:16px/1.65 Arial,sans-serif}main{max-width:900px;margin:40px auto;padding:30px 40px;background:white;border:1px solid #dce1dc;border-radius:12px}h1,h2{font-family:Georgia,serif;font-weight:400;line-height:1.2}h1{font-size:36px}h2{margin-top:38px;font-size:27px}h3{margin-top:28px}a{color:#2f6f6f}pre{padding:18px;background:#eef2ef;border-radius:8px;overflow:auto;font-size:14px}code{font-family:Consolas,monospace}li{margin:10px 0}.note{padding:18px;background:#fff6da;border-radius:8px}.safe{padding:18px;background:#e6f5ed;border-radius:8px}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #dce1dc;text-align:left;padding:12px}footer{margin-top:36px;color:#626b76;font-size:14px}@media(max-width:600px){main{padding:25px;margin:0;border-radius:0}}
+  </style>
+</head>
+<body><main>
+  <p style="color:#2f6f6f;font-size:12px;letter-spacing:2px">DMN MATHEMATICS · SEC 3 EYE REVIEW</p>
+  <h1>Set up the shared reflection workspace</h1>
+  <p>The website runs from your Sec 3 EYE Review GitHub repository. Supabase handles teacher login and private paper storage. A Cloudflare Worker and D1 hold shared content and anonymous class summaries.</p>
+  <p class="safe"><strong>No payment card is required for this method.</strong> Keep Supabase, Cloudflare Workers and D1 on their Free plans. Do not activate Cloudflare R2. The application blocks new uploads at 750 MB, below Supabase Free's 1 GB file-storage allowance.</p>
+  <p class="note"><strong>Uploading the website and connecting the backend are separate.</strong> Until the backend is connected, the teacher page opens in a labelled local preview whose changes stay on that browser.</p>
+
+  <h2>Before you begin: identify the repository name</h2>
+  <p>Open your Sec 3 EYE Review repository on GitHub. Its address has the form:</p>
+  <pre>https://github.com/dmn-math/REPOSITORY-NAME</pre>
+  <p>Write down the final part shown as <code>REPOSITORY-NAME</code>. You will insert that exact spelling in the URLs below.</p>
+
+  <h2>1. Upload the website to Sec 3 EYE Review</h2>
+  <ol>
+    <li>Extract the downloaded ZIP.</li>
+    <li>Open <code>UPLOAD_TO_GITHUB</code>.</li>
+    <li>Copy the entire <code>math-workspace</code> folder into the root of your <strong>Sec 3 EYE Review</strong> repository. Do not place it in <code>DMN-Math-Resources</code>.</li>
+    <li>Use GitHub Desktop to commit and push the folder. Upload the extracted folder, not the ZIP.</li>
+    <li>In that repository, open Settings → Pages and ensure GitHub Pages deploys from the branch/folder used by your existing site.</li>
+  </ol>
+  <table><tr><th>Page</th><th>Address</th></tr><tr><td>Teachers</td><td><code>https://dmn-math.github.io/REPOSITORY-NAME/math-workspace/</code></td></tr><tr><td>Students</td><td><code>https://dmn-math.github.io/REPOSITORY-NAME/math-workspace/reflection.html</code></td></tr></table>
+
+  <h2>2. Configure Supabase login</h2>
+  <ol>
+    <li>Open the Supabase project you already created.</li>
+    <li>Open Authentication → Providers → Email. Ensure <strong>Enable Email provider</strong> is on. Keep <strong>Confirm email</strong> on, then save.</li>
+    <li>Open Authentication → URL Configuration.</li>
+    <li>Set <strong>Site URL</strong> to:<pre>https://dmn-math.github.io/REPOSITORY-NAME/math-workspace/index.html</pre></li>
+    <li>Add both redirect URLs:<pre>https://dmn-math.github.io/REPOSITORY-NAME/math-workspace/index.html
+https://dmn-math.github.io/REPOSITORY-NAME/math-workspace/index.html?recovery=1</pre></li>
+    <li>Open Authentication → Users → Add user. Create your owner account with a strong password and mark the email as confirmed. Use this same email later for <code>OWNER_EMAIL</code>.</li>
+    <li>Open Project Settings → API. Copy the <strong>Project URL</strong> and <strong>publishable key</strong> (the legacy <code>anon</code> key also works).</li>
+  </ol>
+  <p>For additional teachers, you can create and confirm their accounts yourself. Supabase's default email sender has restrictions; configure custom SMTP only if teachers must receive their own confirmation and password-reset emails.</p>
+
+  <h2>3. Create private file storage in Supabase</h2>
+  <ol>
+    <li>In Supabase, open Storage.</li>
+    <li>Select <strong>New bucket</strong>.</li>
+    <li>Name it exactly <code>dmn-math-files</code>.</li>
+    <li>Keep <strong>Public bucket</strong> off. Set the file-size limit to <strong>20 MB</strong>, if that option is shown.</li>
+    <li>Create the bucket. You do not need to create a public access policy; files are accessed securely through the Worker.</li>
+    <li>Open Project Settings → API Keys. Copy the protected <strong>service_role</strong> key. This key is used only once in a terminal command below. Never put it in GitHub, <code>wrangler.jsonc</code>, <code>workspace-config.js</code>, a screenshot or a message.</li>
+  </ol>
+
+  <h2>4. Install the backend tools on Windows</h2>
+  <ol>
+    <li>Install the current Node.js LTS version from <a href="https://nodejs.org/" target="_blank" rel="noreferrer">nodejs.org</a>.</li>
+    <li>Open the extracted package's <code>SOURCE</code> folder in File Explorer.</li>
+    <li>Click the address bar, type <code>powershell</code> and press Enter.</li>
+    <li>Use the commands ending in <code>.cmd</code>; this avoids the PowerShell script-execution error you encountered.</li>
+  </ol>
+  <pre>npm.cmd install
+npx.cmd wrangler login</pre>
+  <p>Your browser will open Cloudflare's consent page. Approve the Wrangler login. This does not activate R2 or add a payment method.</p>
+
+  <h2>5. Create only the free Cloudflare D1 database</h2>
+  <p>Run:</p>
+  <pre>npx.cmd wrangler d1 create dmn-math-db</pre>
+  <p>Copy the database ID printed by the command. <strong>Do not run any R2 bucket command.</strong></p>
+
+  <h2>6. Configure the Worker</h2>
+  <p>Open <code>SOURCE/backend/wrangler.jsonc</code> in Notepad or Visual Studio Code and replace:</p>
+  <table><tr><th>Field</th><th>What to enter</th></tr><tr><td><code>OWNER_EMAIL</code></td><td>Your confirmed owner login email</td></tr><tr><td><code>SUPABASE_URL</code></td><td>Your Supabase Project URL</td></tr><tr><td><code>SUPABASE_PUBLISHABLE_KEY</code></td><td>Your public publishable/anon key</td></tr><tr><td><code>database_id</code></td><td>The database ID from Step 5</td></tr><tr><td><code>SUPABASE_STORAGE_BUCKET</code></td><td>Leave as <code>dmn-math-files</code></td></tr><tr><td><code>ALLOWED_ORIGINS</code></td><td>Leave as <code>https://dmn-math.github.io</code>; a repository path is not included here</td></tr></table>
+  <p>Save the file. Then place the service-role key in Cloudflare's protected secret store:</p>
+  <pre>npx.cmd wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config backend/wrangler.jsonc</pre>
+  <p>When PowerShell asks for the secret value, paste the Supabase <code>service_role</code> key and press Enter. It will not be written into your project files.</p>
+
+  <h2>7. Create the tables and deploy</h2>
+  <pre>npm.cmd run backend:migrate
+npm.cmd run backend:deploy</pre>
+  <p>Copy the Worker address printed after deployment, for example:</p>
+  <pre>https://dmn-math-api.YOUR-SUBDOMAIN.workers.dev</pre>
+  <p>Open <code>https://YOUR-WORKER-ADDRESS/api/health</code>. A correct setup reports <code>ready: true</code>, <code>storage: "supabase"</code> and <code>uploadLimitMb: 750</code>.</p>
+
+  <h2>8. Connect the uploaded website</h2>
+  <ol>
+    <li>In your local package, open <code>UPLOAD_TO_GITHUB/math-workspace/workspace-config.js</code>.</li>
+    <li>Enter the Worker address, Supabase Project URL and public publishable key:</li>
+  </ol>
+  <pre>window.DMN_WORKSPACE_CONFIG = {
+  apiUrl: "https://dmn-math-api.YOUR-SUBDOMAIN.workers.dev",
+  supabaseUrl: "https://YOUR-PROJECT.supabase.co",
+  supabasePublishableKey: "YOUR_PUBLIC_PUBLISHABLE_KEY"
+};</pre>
+  <p>Only the public publishable key belongs here. Never add the service-role key. Upload this revised <code>workspace-config.js</code> to the same <code>math-workspace</code> folder in your Sec 3 EYE Review repository, then commit and push.</p>
+
+  <h2>9. Verify the workflow</h2>
+  <ol>
+    <li>Open the teacher URL and sign in using your confirmed owner account.</li>
+    <li>Create a small test paper, upload a PDF, crop one complete question and save its tags.</li>
+    <li>Publish the reflection and open the generated student link in a private browser window.</li>
+    <li>Create a test class, use its shared class link, submit one anonymous reflection and confirm the class summary appears. Students should not enter names or individual student codes.</li>
+    <li>In Supabase Storage, open <code>dmn-math-files</code> and confirm the test PDF/crop is present.</li>
+  </ol>
+
+  <h2>Security and limits</h2>
+  <ul>
+    <li>The bucket is private. Draft files require an approved teacher login; students receive only files referenced by a published reflection.</li>
+    <li>The application accepts PDF, PNG, JPEG and WebP files up to 20 MB each.</li>
+    <li>New uploads stop at 750 MB, leaving space below Supabase Free's 1 GB allowance.</li>
+    <li>The service-role key exists only in Cloudflare's protected Worker secrets. If it is ever exposed, revoke it in Supabase and enter the replacement using <code>wrangler secret put</code>.</li>
+    <li>Supabase Free projects may pause after inactivity. Opening the site again may require the project to resume.</li>
+  </ul>
+
+  <footer>This package does not activate paid services and does not require Cloudflare R2. Your Sec 3 EYE Review repository is changed only when you commit and push the extracted website folder.</footer>
+</main></body></html>
