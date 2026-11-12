@@ -6,15 +6,15 @@ This file is self-contained for transfer to another chat: it includes the taggin
 
 ## Start here: use this file in a new chat or account
 
-Upload **this Markdown file and the question paper PDFs** in the new chat. This file includes the E-Math 4052 tagging rules, the full recorded 130-SIO codebook in section 20, and confirmed corrections. It does not require access to the original chat, Library or website. If your website taxonomy or import format has changed, attach the current TOS/codebook or a current import example as well. The rules and codebook here are for **E-Math 4052**; use a separate authoritative codebook for A-Math or another syllabus.
+Attach or paste **this full Markdown guide**, then attach the **question paper PDF** in the same chat. Add the marking scheme if available. This guide contains the E-Math 4052 tagging rules, the 130-SIO codebook in section 20, and a complete, copyable DMN Workspace JSON example in section 12. No separate JSON template or earlier chat is needed. These codes are for **E-Math 4052** only.
 
 **Copy-paste prompt**
 
-> Read `EMath_4052_Tagging_Guide_Portable.md` in full. Tag only the attached E-Math 4052 papers I specify. Visually check each paper, preserve the printed question and part labels, and reconcile the marks. Give each marked part one primary SIO with its exact EM code and description, supporting SIOs only where useful, AO, difficulty, confidence and a short reason. Keep the final question of every Paper 2 classified as PRWC across all its parts. Flag uncertainties and source issues for me to review. Give me a table of topics tested and, if requested, the exact EM codes for untested SIOs. Return an updated copy of the guide after each batch or correction. If I request import JSON, use my current import template when supplied.
+> Read this E-Math 4052 guide in full and tag the attached exam paper. Preserve its printed question and part labels, use the exact EM codes and the Paper 2 PRWC rule, and reconcile the marks. Return a downloadable DMN Workspace .json file using the example in section 12. Leave every part unreviewed and list uncertainties separately by question and part.
 
 **Source precedence:** Apply explicit teacher corrections to the stated paper/part or rule. For code IDs, wording and chapter assignments, use the newest explicitly supplied authoritative E-Math taxonomy; otherwise use section 20. Older tables and historical package examples do not override it. Do not reassign or invent IDs to fill a gap. If a rule conflicts with the current reference, flag the conflict for review.
 
-**Default deliverable:** A part-by-part review table and a short list of issues or choices for the teacher. If the paper is incomplete, mark the audit and coverage as partial and state what is missing. Mark new tags as proposed until the teacher approves them. Create import files only when requested; do not claim any paper has been installed or published.
+**Default deliverable for DMN Workspace:** When a paper accompanies this guide, return one downloadable import JSON per paper and a short list of uncertainties or source issues. If the teacher asks for review only, provide the review table instead. State any missing pages, marks or required metadata. Tags remain provisional until the teacher checks them. Do not claim any paper has been imported or published.
 
 ### Tested topics and untested SIO codes
 
@@ -207,7 +207,7 @@ When tagging a new paper:
 Historical pilot note: 128 E-Math records were initially extracted from the earlier uploaded website. The later user-uploaded website has 130 records, including the approved additions, with original numbering retained. Use sections 17 and 20 for the current recorded reference. Earlier companion files were not supplied separately during that pilot; do not claim to have checked unavailable files.
 
 - Package format: `dmn-math-package-v1`.
-- Paper use for bank population: `role: "bank"`.
+- Use `role: "bank"` for a practice source or `role: "reflection"` for a student reflection paper. Use the metadata in the workspace prompt when supplied. It takes precedence over illustrative or historical metadata in this guide.
 - Part fields: `label`, `maxMarks`, `sioId`, `secondarySioIds`, `ao`, `difficulty`, `reviewed`.
 - Question fields include `qno`, `images`, `parts`, `matchSioId`, `source`, `answerText`, `answerImages`.
 - `sioId` is the primary part SIO; preserve all exact official wording in review displays rather than rewriting the taxonomy label.
@@ -217,6 +217,43 @@ Historical pilot note: 128 E-Math records were initially extracted from the earl
 - Create fresh draft pilot papers for tests. Set their title, subject, paper number, bank role and total marks before import. Avoid importing the same package twice.
 - Imported parts start unreviewed. Review the crops, marks, SIOs, AOs, difficulty and answers before publishing.
 - Website bank coverage includes primary and supporting tags, but the current automatic practice matcher accepts primary matches only. The broader fallback philosophy in section 9 is an intended curation policy, not a claim about the current code.
+
+### Complete DMN Workspace JSON example
+
+This is a valid one-question, five-mark example. Replace every example value with the actual paper's metadata, printed labels, marks and tags. Do not copy the example tags to unrelated questions.
+
+```json
+{
+  "format": "dmn-math-package-v1",
+  "paper": {
+    "title": "Example E-Math Paper 1",
+    "subject": "emath",
+    "year": 2026,
+    "number": 1,
+    "category": "school",
+    "role": "reflection",
+    "totalMarks": 5
+  },
+  "questions": [
+    {
+      "qno": "1",
+      "images": [],
+      "parts": [
+        {"label": "a", "maxMarks": 2, "sioId": "EM-16", "secondarySioIds": [], "ao": "AO1", "difficulty": "Low", "reviewed": false},
+        {"label": "b", "maxMarks": 3, "sioId": "EM-17", "secondarySioIds": ["EM-16"], "ao": "AO2", "difficulty": "Moderate", "reviewed": false}
+      ],
+      "matchSioId": "EM-17",
+      "answerText": "",
+      "answerImages": []
+    }
+  ]
+}
+```
+
+- Use the exact keys above. Question and part labels are strings; marks are numeric. Include each printed mark-bearing part once. Report discrepancies with the cover total instead of changing printed marks.
+- Write demand as `Low`, `Moderate`, or `High` in JSON; these correspond to Foundation, Standard, and Challenge in the earlier E-Math calibration rules. AO values are exactly `AO1`, `AO2`, or `AO3`.
+- For O Level papers use `"category": "olevel"` and the verified `examSession` (`"J"` or `"N"`). Do not infer an unknown session.
+- If actual question crops are unavailable, use `"images": []`; never fabricate images. Keep unverified answers empty. Provide the file as downloadable `.json`, without Markdown fences, plus a short separate uncertainty list. The teacher can attach the PDF and crop in the editor after import.
 
 ## 13. Source and completeness audit
 
@@ -423,7 +460,7 @@ A secondary tag records a useful supporting demand, not every operation in a sol
 - **AO3:** Assessed explanation, contextual interpretation, critique, comparison, justification of a claim or recommendation, and non-simple statistical reasoning.
 - The words “show”, “explain” and “justify” are evidence of the demand, not a complete AO rule. Check the mathematics and confirmed examples. Do not classify every multi-step taught algorithm as AO2 simply because it has several written lines.
 - A real-world context alone does not raise the AO. Direct compound-interest formula application remains AO1. PRWC classification alone does not determine AO or difficulty.
-- Difficulty remains **Foundation / Standard / Challenge**, judged from demand rather than marks or AO alone. If an import template uses another field or vocabulary, follow the supplied schema and make any mapping explicit.
+- Judge difficulty from demand rather than marks or AO alone. Write **Low / Moderate / High** in the DMN Workspace JSON, corresponding to **Foundation / Standard / Challenge** in the calibration rules.
 
 ### Review output
 
@@ -434,7 +471,7 @@ Unless the user requests a different format, include these columns:
 | School + year + paper + question | Original label | Printed allocation | One primary | Only useful supporting skills | From primary SIO | AO1/2/3 | Foundation/Standard/Challenge | High/Medium/Low | Assessment demand and any ambiguity |
 
 - List uncertain decisions and source defects clearly. Confidence is separate from teacher approval: a High-confidence proposal still awaits approval unless explicitly confirmed.
-- Use the user's current import template when supplied. Section 12 records the previously used package format; it is not a guarantee that every later website accepts the same schema.
+- Use the self-contained DMN Workspace JSON example in section 12. No separate template is needed for this workflow.
 - Do not infer website installation or publication from creating a JSON package. Import into a fresh draft only when using the previously audited append-only importer; check the actual current importer if updating an existing record.
 - Provide visual review HTML only when requested or appropriate to the task. If the user asks for JSON only, deliver JSON and a concise uncertainty list; no separate HTML is required.
 - If crops are requested, preserve shared stems, necessary grids, source labels and continuation content. Keep diagram geometry and consistent horizontal scale. Remove only response/working content that can be distinguished reliably from the actual question. Never remove a sequence instruction or table entry merely because it contains ellipses.

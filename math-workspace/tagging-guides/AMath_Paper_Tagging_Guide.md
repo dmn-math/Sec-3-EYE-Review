@@ -4,13 +4,13 @@
 
 ## Start here in a new chat
 
-Upload **this guide and the actual question paper(s)**. Include a marking scheme if available. For topical TYS, upload the chapter PDFs with the section headings and original exam references visible. If the workspace catalogue or importer has changed, also attach the latest SIO export or a working import template.
+Attach or paste **this full Markdown guide**, then attach the **question paper PDF** in the same chat. Add the marking scheme if available. For topical TYS, include the section headings and original exam references. This guide contains the 52-SIO codebook and a complete DMN Workspace JSON example in section 7. No separate JSON template or earlier chat is needed.
 
 Copy this prompt:
 
-> Read the attached A-Math tagging guide in full and use its SIO catalogue, AO rules, C3R demand calibration and TYS section mapping. Tag every printed, mark-bearing part of the supplied paper. Give me a table with the question/part, marks, primary and secondary SIO descriptions with codes, AO, demand and brief reasons or flags. Identify the main concept of each whole question. Let me vet it first, then produce the DMN Workspace JSON using the format in the guide. If I ask for JSON directly, generate it with the flags and leave unvetted parts as reviewed: false.
+> Read this A-Math guide in full and tag the attached exam paper. Preserve its printed question and part labels, use the exact AM codes, AO rules and demand calibration, and reconcile the marks. Return a downloadable DMN Workspace .json file using section 7. Leave every part unreviewed and list uncertainties separately by question and part.
 
-The guide contains the 52 A-Math catalogue entries and an import example, so another chat can work without this project's history. Use **explicit teacher instructions and the latest supplied A-Math catalogue/import template** when they override this guide. Keep changes specific to the stated paper, cohort or batch. Never apply A-Math codes to E-Math or use the E-Math PRWC convention for A-Math.
+When a paper accompanies this guide, return one downloadable import JSON per paper and a short list of uncertainties. If the teacher asks for review only, provide the review table instead. Use the actual paper details from the workspace prompt when supplied, and follow explicit teacher corrections. Never apply A-Math codes to E-Math or use the E-Math PRWC convention for A-Math.
 
 ## 1. Read and inventory the paper
 
@@ -106,9 +106,9 @@ Use the catalogue's full description in the actual review, or give descriptions 
 
 If asked what is **not tested**, compare the mathematical work with **every entry** in section 9, not just primary tags. Distinguish directly assessed, substantially embedded, partially covered, incidental only, not assessed and duplicate catalogue entry. For a broad SIO, name the subskills that did not occur. A provisional fallback, a calculator key, a method in an optional solution or a routine prerequisite does not by itself establish coverage. State what pages/parts the coverage report includes, and group missing outcomes by chapter with **description and ID**. Keep a duplicated row visible as a duplicate, not a second independent untested outcome.
 
-## 7. Create the DMN Workspace JSON when requested
+## 7. Complete DMN Workspace JSON example
 
-Use the exact shape below for the **DMN Workspace importer** (`dmn-math-package-v1`), unless the teacher supplies a newer working template. The older standalone reflection HTML embeds a different data array; a review JSON or a sidecar source map is also a different format. Do not present any of those as directly importable packages.
+Use the exact shape below for the **DMN Workspace importer** (`dmn-math-package-v1`). A review table, standalone reflection HTML or sidecar source map cannot be imported as a paper.
 
 The example is illustrative, with one 6-mark question. Use verified paper metadata in a real package.
 
@@ -120,6 +120,7 @@ The example is illustrative, with one 6-mark question. Use verified paper metada
     "subject": "amath",
     "year": 2026,
     "number": 2,
+    "category": "school",
     "role": "bank",
     "totalMarks": 6
   },
@@ -148,13 +149,15 @@ The example is illustrative, with one 6-mark question. Use verified paper metada
         }
       ],
       "matchSioId": "AM-68",
-      "answerText": ""
+      "answerText": "",
+      "answerImages": []
     }
   ]
 }
 ```
 
 - One package per paper or verified original year/paper group. `paper.role` is `bank` for practice sources and `reflection` for a paper students will reflect on. Use the teacher's intended role; do not use the two interchangeably.
+- For O Level papers use `"category": "olevel"` and the verified `examSession` (`"J"` or `"N"`). Do not infer an unknown session. Supply a downloadable `.json` file without Markdown fences and list uncertainties separately.
 - `qno` and `label` are strings. `maxMarks`, `totalMarks`, `year` and `number` are numbers. `totalMarks` equals the sum of the included `maxMarks`. Use the exact keys and the case-sensitive values `AO1`/`AO2`/`AO3` and `Low`/`Moderate`/`High`. Keep `secondarySioIds` as an array, even when empty.
 - Keep `reviewed: false` until the teacher explicitly vets the tags for that part. Checking a scan, finding a solution, generating the JSON or applying a provisional fallback does not count as teacher approval.
 - `images` holds real question image data URLs if screenshots are requested and available. Include complete question statements, all assigned parts and required diagrams in reading order. Exclude answers, unrelated questions and blank working space. Use `[]` for a tagging-only package when no images are required; do not fabricate image data. Keep `answerText` empty unless answers are requested and verified.
