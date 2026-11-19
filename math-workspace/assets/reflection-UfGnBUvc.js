@@ -1,0 +1,1 @@
+import{C as e,O as t,T as n,g as r,x as i}from"./preload-helper-PIZIPuFs.js";import{t as a}from"./student-reflection-CziGh6kQ.js";var o=t(n(),1),s=e(),c=i();(0,s.createRoot)(document.getElementById(`root`)).render((0,c.jsxs)(o.StrictMode,{children:[(0,c.jsx)(r,{}),(0,c.jsx)(a,{})]}));
